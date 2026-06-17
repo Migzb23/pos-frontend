@@ -106,6 +106,22 @@
       });
       document.getElementById('totalSales').textContent = totalSales;
     }
+
+    function saveSale(name, price) {
+      fetch('https://pos-backend.up.railway.app/sales', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item: name, price })
+      });
+    }
+
+    function loadSales() {
+      fetch('https://pos-backend.up.railway.app/sales')
+        .then(res => res.json())
+        .then(data => {
+          console.log(data); // Replace with your render function
+        });
+    }
   </script>
 </body>
 </html>
