@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Smooth POS Prototype (Peso)</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
+    h1 { text-align: center; }
+    .container { display: flex; gap: 30px; }
+    .section { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 45%; }
+    input, button { 
+      padding: 8px; 
+      margin: 5px 0; 
+      width: 100%; 
+      box-sizing: border-box; 
+    }
+    input { padding-right: 20px; }
+    ul { list-style: none; padding: 0; }
+    li { 
+      margin: 5px 0; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+    }
+    .item-name { flex: 1; }
+    .sold { color: green; }
+    .sell-btn { 
+      width: 70px;          /* fixed width */
+      text-align: center;   /* center the word */
+      font-weight: bold;    /* emphasize "Sold" */
+      border: 1px solid #000; 
+      border-radius: 5px; 
+      background: none;     /* no fill color */
+      cursor: pointer; 
+    }
+    .sell-btn:hover {
+      background: #f0f0f0;  /* subtle hover effect */
+    }
+  </style>
+</head>
+<body>
+  <h1>POS System Prototype (₱)</h1>
+  
+  <div class="container">
+    <!-- Item Input & Display -->
+    <div class="section">
+      <h2>Add Item</h2>
+      <input type="text" id="itemName" placeholder="Item Name">
+      <input type="number" id="itemPrice" placeholder="Price (₱)">
+      <button onclick="addItem()">Add to Display</button>
+      
+      <h2>Items on Display</h2>
+      <ul id="displayList"></ul>
+    </div>
+    
+    <!-- Sold Items & Totals -->
+    <div class="section">
+      <h2>Sold Items</h2>
+      <ul id="soldList"></ul>
+      <h3>Total Sales: ₱<span id="totalSales">0</span></h3>
+    </div>
+  </div>
+  
+  <script>
+    let displayItems = [];
+    let soldItems = [];
+    let totalSales = 0;
+
+    function addItem() {
+      const name = document.getElementById('itemName').value;
+      const price = parseFloat(document.getElementById('itemPrice').value);
+      if(name && price > 0) {
+        displayItems.push({ name, price });
+        renderDisplay();
+        document.getElementById('itemName').value = '';
+        document.getElementById('itemPrice').value = '';
+      }
+    }
+
+    function renderDisplay() {
+      const list = document.getElementById('displayList');
+      list.innerHTML = '';
+      displayItems.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="item-name">${item.name} - ₱${item.price}</span>
+          <button class="sell-btn" onclick="sellItem(${index})">Sold</button>`;
+        list.appendChild(li);
+      });
+    }
+
+    function sellItem(index) {
+      const item = displayItems.splice(index, 1)[0];
+      soldItems.push(item);
+      totalSales += item.price;
+      renderDisplay();
+      renderSold();
+    }
+
+    function renderSold() {
+      const list = document.getElementById('soldList');
+      list.innerHTML = '';
+      soldItems.forEach(item => {
+        const li = document.createElement('li');
+        li.classList.add('sold');
+        li.textContent = `${item.name} - ₱${item.price}`;
+        list.appendChild(li);
+      });
+      document.getElementById('totalSales').textContent = totalSales;
+    }
+  </script>
+</body>
+</html>
