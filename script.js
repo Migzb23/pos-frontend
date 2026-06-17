@@ -173,4 +173,48 @@ function sortTable(tbodyId, colIndex, type = 'string') {
   const rows = Array.from(tbody.querySelectorAll('tr'));
   const headers = tbody.closest('table').querySelectorAll('th');
 
-  if
+  if (rows.length === 0) return;
+
+  let sorted = rows.sort((a, b) => {
+    let valA = a.cells[colIndex].textContent.trim().toLowerCase();
+    let valB = b.cells[colIndex].textContent.trim().toLowerCase();
+
+    if (type === 'number') {
+      valA = parseFloat(valA.replace(/[^\d.-]/g, '')) || 0;
+      valB = parseFloat(valB.replace(/[^\d.-]/g, '')) || 0;
+    }
+
+    if (valA < valB) return -1;
+    if (valA > valB) return 1;
+    return 0;
+  });
+
+  let currentSort = tbody.getAttribute('data-sorted');
+  if (currentSort === `${colIndex}-asc`) {
+    sorted.reverse();
+    tbody.setAttribute('data-sorted', `${colIndex}-desc`);
+    updateIndicators(headers, colIndex, 'desc');
+  } else {
+    tbody.setAttribute('data-sorted', `${colIndex}-asc`);
+    updateIndicators(headers, colIndex, 'asc');
+  }
+
+  tbody.innerHTML = '';
+  sorted.forEach(row => tbody.appendChild(row));
+}
+
+function updateIndicators(headers, activeIndex, direction) {
+  headers.forEach((header, i) => {
+    const indicator = header.querySelector('.sort-indicator');
+    if (!indicator) return;
+    if (i === activeIndex) {
+      indicator.textContent = direction === 'asc' ? '▲' : '▼';
+    } else {
+      indicator.textContent = '';
+    }
+  });
+}
+
+// ✅ Initial load
+loadDisplayItems();
+loadSales();
