@@ -90,6 +90,22 @@ tr:hover {
   transform: scale(1.05);
 }
 
+/* ✅ Remove buttons */
+.remove-btn {
+  background: #ff9900;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 5px 10px;
+  transition: background 0.2s, transform 0.1s;
+}
+.remove-btn:hover {
+  background: #cc7a00;
+  transform: scale(1.05);
+}
+
 /* ✅ Clear buttons */
 button[onclick*="clearDisplay"],
 button[onclick*="clearSold"] {
