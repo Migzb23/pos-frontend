@@ -31,6 +31,7 @@ function renderDisplay() {
       <td>${item.name}</td>
       <td>₱${item.price}</td>
       <td><button class="sell-btn" onclick="sellItem(${index})">Sold</button></td>
+      <td><button class="remove-btn" onclick="removeDisplayItem(${index})">Remove</button></td>
     `;
     tableBody.appendChild(row);
   });
@@ -46,20 +47,34 @@ function sellItem(index) {
   renderSold();
 }
 
+// Remove display item
+function removeDisplayItem(index) {
+  displayItems.splice(index, 1);
+  renderDisplay();
+}
+
 // Render sold table
 function renderSold() {
   const tableBody = document.getElementById('soldList');
   tableBody.innerHTML = '';
-  soldItems.forEach(item => {
+  soldItems.forEach((item, index) => {
     const row = document.createElement('tr');
     row.innerHTML = `
       <td>${item.name}</td>
       <td>₱${item.price}</td>
       <td>${item.date ? new Date(item.date).toLocaleString() : 'just now'}</td>
+      <td><button class="remove-btn" onclick="removeSoldItem(${index})">Remove</button></td>
     `;
     tableBody.appendChild(row);
   });
   document.getElementById('totalSales').textContent = totalSales;
+}
+
+// Remove sold item
+function removeSoldItem(index) {
+  const item = soldItems.splice(index, 1)[0];
+  totalSales -= item.price;
+  renderSold();
 }
 
 // Save display item
@@ -144,13 +159,13 @@ function filterSold() {
   });
 }
 
-// ✅ Sort with indicators (safe for empty tables)
+// ✅ Sort with indicators
 function sortTable(tbodyId, colIndex, type = 'string') {
   const tbody = document.getElementById(tbodyId);
   const rows = Array.from(tbody.querySelectorAll('tr'));
-  const headers = tbody.closest('table').querySelectorAll('th'); // safer
+  const headers = tbody.closest('table').querySelectorAll('th');
 
-  if (rows.length === 0) return; // ✅ nothing to sort
+  if (rows.length === 0) return;
 
   let sorted = rows.sort((a, b) => {
     let valA = a.cells[colIndex].textContent.trim().toLowerCase();
@@ -159,40 +174,3 @@ function sortTable(tbodyId, colIndex, type = 'string') {
     if (type === 'number') {
       valA = parseFloat(valA.replace(/[^\d.-]/g, '')) || 0;
       valB = parseFloat(valB.replace(/[^\d.-]/g, '')) || 0;
-    }
-
-    if (valA < valB) return -1;
-    if (valA > valB) return 1;
-    return 0;
-  });
-
-  let currentSort = tbody.getAttribute('data-sorted');
-  if (currentSort === `${colIndex}-asc`) {
-    sorted.reverse();
-    tbody.setAttribute('data-sorted', `${colIndex}-desc`);
-    updateIndicators(headers, colIndex, 'desc');
-  } else {
-    tbody.setAttribute('data-sorted', `${colIndex}-asc`);
-    updateIndicators(headers, colIndex, 'asc');
-  }
-
-  tbody.innerHTML = '';
-  sorted.forEach(row => tbody.appendChild(row));
-}
-
-// ✅ Update sort indicators (safe check)
-function updateIndicators(headers, activeIndex, direction) {
-  headers.forEach((header, i) => {
-    const indicator = header.querySelector('.sort-indicator');
-    if (!indicator) return; // ✅ skip if no indicator span
-    if (i === activeIndex) {
-      indicator.textContent = direction === 'asc' ? '▲' : '▼';
-    } else {
-      indicator.textContent = '';
-    }
-  });
-}
-
-// ✅ Initial load
-loadDisplayItems();
-loadSales();
