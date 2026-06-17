@@ -5,14 +5,20 @@ let displayItems = [];
 let soldItems = [];
 let totalSales = 0;
 
-// Add item to display list
+// Add item to display list + save to backend
 function addItem() {
   const name = document.getElementById('itemName').value;
   const price = parseFloat(document.getElementById('itemPrice').value);
 
   if (name && price > 0) {
-    displayItems.push({ name, price });
+    const newItem = { name, price };
+
+    // ✅ Save to backend (Display collection)
+    saveDisplayItem(newItem);
+
+    displayItems.push(newItem);
     renderDisplay();
+
     document.getElementById('itemName').value = '';
     document.getElementById('itemPrice').value = '';
   } else {
@@ -40,7 +46,7 @@ function sellItem(index) {
   soldItems.push(item);
   totalSales += item.price;
 
-  // ✅ Save to backend
+  // ✅ Save to backend (Sales collection)
   saveSale(item.name, item.price);
 
   renderDisplay();
@@ -60,7 +66,19 @@ function renderSold() {
   document.getElementById('totalSales').textContent = totalSales;
 }
 
-// Save sale to backend
+// ✅ Save display item to backend
+function saveDisplayItem(item) {
+  fetch(`${backendUrl}/display`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ item: item.name, price: item.price })
+  })
+  .then(res => res.json())
+  .then(data => console.log("Display item saved:", data))
+  .catch(err => console.error("Error saving display item:", err));
+}
+
+// ✅ Save sale to backend
 function saveSale(name, price) {
   fetch(`${backendUrl}/sales`, {
     method: 'POST',
@@ -68,25 +86,17 @@ function saveSale(name, price) {
     body: JSON.stringify({ item: name, price })
   })
   .then(res => res.json())
-  .then(data => console.log("Saved:", data))
+  .then(data => console.log("Sale saved:", data))
   .catch(err => console.error("Error saving sale:", err));
 }
 
-// Load sales history from backend
-function loadSales() {
-  fetch(`${backendUrl}/sales`)
+// ✅ Load display items from backend
+function loadDisplayItems() {
+  fetch(`${backendUrl}/display`)
     .then(res => res.json())
     .then(data => {
-      soldItems = data.map(sale => ({
-        name: sale.item,
-        price: sale.price,
-        date: sale.date
+      displayItems = data.map(item => ({
+        name: item.item,
+        price: item.price,
+        date: item.date
       }));
-      totalSales = soldItems.reduce((sum, sale) => sum + sale.price, 0);
-      renderSold();
-    })
-    .catch(err => console.error("Error loading sales:", err));
-}
-
-// ✅ Initial load from backend
-loadSales();
