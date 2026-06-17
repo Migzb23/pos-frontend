@@ -29,25 +29,49 @@ input, button {
   font-size: 14px;
 }
 
-ul {
-  list-style: none;
-  padding: 0;
+/* ✅ Search bar styling */
+input[type="text"]#searchDisplay,
+input[type="text"]#searchSold {
+  width: 100%;
+  padding: 6px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
-li {
-  margin: 5px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* ✅ Table styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
 }
 
-.item-name {
-  flex: 1;
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
 }
 
-.sold {
-  color: green;
+th {
+  background: #f2f2f2;
   font-weight: bold;
+  cursor: pointer; /* shows clickable sort */
+  user-select: none;
+}
+
+tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+tr:hover {
+  background: #f1f1f1;
+}
+
+/* ✅ Sort indicator styling */
+.sort-indicator {
+  font-size: 12px;
+  margin-left: 5px;
+  color: #555;
 }
 
 /* ✅ Sold button */
