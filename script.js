@@ -144,11 +144,13 @@ function filterSold() {
   });
 }
 
-// ✅ Sort with indicators
+// ✅ Sort with indicators (safe for empty tables)
 function sortTable(tbodyId, colIndex, type = 'string') {
   const tbody = document.getElementById(tbodyId);
   const rows = Array.from(tbody.querySelectorAll('tr'));
-  const headers = tbody.parentElement.querySelectorAll('th');
+  const headers = tbody.closest('table').querySelectorAll('th'); // safer
+
+  if (rows.length === 0) return; // ✅ nothing to sort
 
   let sorted = rows.sort((a, b) => {
     let valA = a.cells[colIndex].textContent.trim().toLowerCase();
@@ -178,10 +180,11 @@ function sortTable(tbodyId, colIndex, type = 'string') {
   sorted.forEach(row => tbody.appendChild(row));
 }
 
+// ✅ Update sort indicators (safe check)
 function updateIndicators(headers, activeIndex, direction) {
   headers.forEach((header, i) => {
     const indicator = header.querySelector('.sort-indicator');
-    if (!indicator) return;
+    if (!indicator) return; // ✅ skip if no indicator span
     if (i === activeIndex) {
       indicator.textContent = direction === 'asc' ? '▲' : '▼';
     } else {
