@@ -100,22 +100,50 @@ function loadDisplayItems() {
         price: item.price,
         date: item.date
       }));
-// Clear all display items
-app.delete("/display/clear", async (req, res) => {
-  try {
-    await DisplayModel.deleteMany({});
-    res.json({ message: "All display items cleared" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+      renderDisplay();
+    })
+    .catch(err => console.error("Error loading display items:", err));
+}
 
-// Clear all sales
-app.delete("/sales/clear", async (req, res) => {
-  try {
-    await SaleModel.deleteMany({});
-    res.json({ message: "All sales cleared" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+// ✅ Load sales history from backend
+function loadSales() {
+  fetch(`${backendUrl}/sales`)
+    .then(res => res.json())
+    .then(data => {
+      soldItems = data.map(sale => ({
+        name: sale.item,
+        price: sale.price,
+        date: sale.date
+      }));
+      totalSales = soldItems.reduce((sum, sale) => sum + sale.price, 0);
+      renderSold();
+    })
+    .catch(err => console.error("Error loading sales:", err));
+}
+
+// ✅ Clear display items (frontend + backend)
+function clearDisplay() {
+  displayItems = [];
+  renderDisplay();
+
+  fetch(`${backendUrl}/display/clear`, { method: 'DELETE' })
+    .then(res => res.json())
+    .then(data => console.log("Display cleared:", data))
+    .catch(err => console.error("Error clearing display:", err));
+}
+
+// ✅ Clear sold items (frontend + backend)
+function clearSold() {
+  soldItems = [];
+  totalSales = 0;
+  renderSold();
+
+  fetch(`${backendUrl}/sales/clear`, { method: 'DELETE' })
+    .then(res => res.json())
+    .then(data => console.log("Sales cleared:", data))
+    .catch(err => console.error("Error clearing sales:", err));
+}
+
+// ✅ Initial load from backend
+loadDisplayItems();
+loadSales();
