@@ -100,3 +100,22 @@ function loadDisplayItems() {
         price: item.price,
         date: item.date
       }));
+// Clear all display items
+app.delete("/display/clear", async (req, res) => {
+  try {
+    await DisplayModel.deleteMany({});
+    res.json({ message: "All display items cleared" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Clear all sales
+app.delete("/sales/clear", async (req, res) => {
+  try {
+    await SaleModel.deleteMany({});
+    res.json({ message: "All sales cleared" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
