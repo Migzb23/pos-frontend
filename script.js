@@ -123,6 +123,8 @@ function loadSales() {
 
 // ✅ Clear display items (frontend + backend)
 function clearDisplay() {
+  if (!confirm("Are you sure you want to clear all display items?")) return;
+
   displayItems = [];
   renderDisplay();
 
@@ -134,6 +136,8 @@ function clearDisplay() {
 
 // ✅ Clear sold items (frontend + backend)
 function clearSold() {
+  if (!confirm("Are you sure you want to clear all sold items?")) return;
+
   soldItems = [];
   totalSales = 0;
   renderSold();
