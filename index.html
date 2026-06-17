@@ -17,14 +17,34 @@
       <button onclick="clearDisplay()">Clear Display Items</button>
       
       <h2>Items on Display</h2>
-      <ul id="displayList"></ul>
+      <input type="text" id="searchDisplay" placeholder="Search Display Items..." onkeyup="filterDisplay()">
+      <table id="displayTable">
+        <thead>
+          <tr>
+            <th onclick="sortTable('displayList',0)">Item Name <span class="sort-indicator"></span></th>
+            <th onclick="sortTable('displayList',1,'number')">Price (₱) <span class="sort-indicator"></span></th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="displayList"></tbody>
+      </table>
     </div>
     
     <!-- Sold Items & Totals -->
     <div class="section">
       <h2>Sold Items</h2>
       <button onclick="clearSold()">Clear Sold Items</button>
-      <ul id="soldList"></ul>
+      <input type="text" id="searchSold" placeholder="Search Sold Items..." onkeyup="filterSold()">
+      <table id="soldTable">
+        <thead>
+          <tr>
+            <th onclick="sortTable('soldList',0)">Item Name <span class="sort-indicator"></span></th>
+            <th onclick="sortTable('soldList',1,'number')">Price (₱) <span class="sort-indicator"></span></th>
+            <th onclick="sortTable('soldList',2)">Date Sold <span class="sort-indicator"></span></th>
+          </tr>
+        </thead>
+        <tbody id="soldList"></tbody>
+      </table>
       <h3>Total Sales: ₱<span id="totalSales">0</span></h3>
     </div>
   </div>
