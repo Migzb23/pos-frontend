@@ -31,7 +31,7 @@ function renderDisplay() {
       <td>${item.name}</td>
       <td>₱${item.price}</td>
       <td><button class="sell-btn" onclick="sellItem(${index})">Sold</button></td>
-      <td><button class="remove-btn" onclick="removeDisplayItem(${index})">Remove</button></td>
+      <td><button class="remove-btn" onclick="removeDisplayItem(${index}, '${item._id || ''}')">Remove</button></td>
     `;
     tableBody.appendChild(row);
   });
@@ -48,9 +48,13 @@ function sellItem(index) {
 }
 
 // Remove display item
-function removeDisplayItem(index) {
+function removeDisplayItem(index, id) {
   displayItems.splice(index, 1);
   renderDisplay();
+  if (id) {
+    fetch(`${backendUrl}/display/${id}`, { method: 'DELETE' })
+      .catch(err => console.error("Error removing display item:", err));
+  }
 }
 
 // Render sold table
@@ -63,7 +67,7 @@ function renderSold() {
       <td>${item.name}</td>
       <td>₱${item.price}</td>
       <td>${item.date ? new Date(item.date).toLocaleString() : 'just now'}</td>
-      <td><button class="remove-btn" onclick="removeSoldItem(${index})">Remove</button></td>
+      <td><button class="remove-btn" onclick="removeSoldItem(${index}, '${item._id || ''}')">Remove</button></td>
     `;
     tableBody.appendChild(row);
   });
@@ -71,10 +75,14 @@ function renderSold() {
 }
 
 // Remove sold item
-function removeSoldItem(index) {
+function removeSoldItem(index, id) {
   const item = soldItems.splice(index, 1)[0];
   totalSales -= item.price;
   renderSold();
+  if (id) {
+    fetch(`${backendUrl}/sales/${id}`, { method: 'DELETE' })
+      .catch(err => console.error("Error removing sold item:", err));
+  }
 }
 
 // Save display item
@@ -100,7 +108,7 @@ function loadDisplayItems() {
   fetch(`${backendUrl}/display`)
     .then(res => res.json())
     .then(data => {
-      displayItems = data.map(item => ({ name: item.item, price: item.price, date: item.date }));
+      displayItems = data.map(item => ({ name: item.item, price: item.price, date: item.date, _id: item._id }));
       renderDisplay();
     })
     .catch(err => console.error("Error loading display items:", err));
@@ -111,7 +119,7 @@ function loadSales() {
   fetch(`${backendUrl}/sales`)
     .then(res => res.json())
     .then(data => {
-      soldItems = data.map(sale => ({ name: sale.item, price: sale.price, date: sale.date }));
+      soldItems = data.map(sale => ({ name: sale.item, price: sale.price, date: sale.date, _id: sale._id }));
       totalSales = soldItems.reduce((sum, sale) => sum + sale.price, 0);
       renderSold();
     })
@@ -165,12 +173,4 @@ function sortTable(tbodyId, colIndex, type = 'string') {
   const rows = Array.from(tbody.querySelectorAll('tr'));
   const headers = tbody.closest('table').querySelectorAll('th');
 
-  if (rows.length === 0) return;
-
-  let sorted = rows.sort((a, b) => {
-    let valA = a.cells[colIndex].textContent.trim().toLowerCase();
-    let valB = b.cells[colIndex].textContent.trim().toLowerCase();
-
-    if (type === 'number') {
-      valA = parseFloat(valA.replace(/[^\d.-]/g, '')) || 0;
-      valB = parseFloat(valB.replace(/[^\d.-]/g, '')) || 0;
+  if
