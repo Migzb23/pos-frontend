@@ -178,4 +178,18 @@ function sortTable(tbodyId, colIndex, type = 'string') {
   sorted.forEach(row => tbody.appendChild(row));
 }
 
-function updateIndicators(headers
+function updateIndicators(headers, activeIndex, direction) {
+  headers.forEach((header, i) => {
+    const indicator = header.querySelector('.sort-indicator');
+    if (!indicator) return;
+    if (i === activeIndex) {
+      indicator.textContent = direction === 'asc' ? '▲' : '▼';
+    } else {
+      indicator.textContent = '';
+    }
+  });
+}
+
+// ✅ Initial load
+loadDisplayItems();
+loadSales();
