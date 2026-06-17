@@ -1,31 +1,40 @@
-const backendUrl = "https://pos-backend.up.railway.app"; // replace with your backend URL
+// ✅ Use your Render backend URL
+const backendUrl = "https://pos-backend-rjnm.onrender.com";
 
 let displayItems = [];
 let soldItems = [];
 let totalSales = 0;
 
+// Add item to display list
 function addItem() {
   const name = document.getElementById('itemName').value;
   const price = parseFloat(document.getElementById('itemPrice').value);
-  if(name && price > 0) {
+
+  if (name && price > 0) {
     displayItems.push({ name, price });
     renderDisplay();
     document.getElementById('itemName').value = '';
     document.getElementById('itemPrice').value = '';
+  } else {
+    alert("Please enter a valid item name and price.");
   }
 }
 
+// Render items on display with Sold button
 function renderDisplay() {
   const list = document.getElementById('displayList');
   list.innerHTML = '';
   displayItems.forEach((item, index) => {
     const li = document.createElement('li');
-    li.innerHTML = `<span class="item-name">${item.name} - ₱${item.price}</span>
-      <button class="sell-btn" onclick="sellItem(${index})">Sold</button>`;
+    li.innerHTML = `
+      <span class="item-name">${item.name} - ₱${item.price}</span>
+      <button class="sell-btn" onclick="sellItem(${index})">Sold</button>
+    `;
     list.appendChild(li);
   });
 }
 
+// Handle selling an item
 function sellItem(index) {
   const item = displayItems.splice(index, 1)[0];
   soldItems.push(item);
@@ -38,6 +47,7 @@ function sellItem(index) {
   renderSold();
 }
 
+// Render sold items list + total
 function renderSold() {
   const list = document.getElementById('soldList');
   list.innerHTML = '';
@@ -50,6 +60,7 @@ function renderSold() {
   document.getElementById('totalSales').textContent = totalSales;
 }
 
+// Save sale to backend
 function saveSale(name, price) {
   fetch(`${backendUrl}/sales`, {
     method: 'POST',
@@ -61,11 +72,16 @@ function saveSale(name, price) {
   .catch(err => console.error("Error saving sale:", err));
 }
 
+// Load sales history from backend
 function loadSales() {
   fetch(`${backendUrl}/sales`)
     .then(res => res.json())
     .then(data => {
-      soldItems = data.map(sale => ({ name: sale.item, price: sale.price, date: sale.date }));
+      soldItems = data.map(sale => ({
+        name: sale.item,
+        price: sale.price,
+        date: sale.date
+      }));
       totalSales = soldItems.reduce((sum, sale) => sum + sale.price, 0);
       renderSold();
     })
