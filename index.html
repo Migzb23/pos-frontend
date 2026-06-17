@@ -24,16 +24,16 @@
     .item-name { flex: 1; }
     .sold { color: green; }
     .sell-btn { 
-      width: 70px;          /* fixed width */
-      text-align: center;   /* center the word */
-      font-weight: bold;    /* emphasize "Sold" */
+      width: 70px;
+      text-align: center;
+      font-weight: bold;
       border: 1px solid #000; 
       border-radius: 5px; 
-      background: none;     /* no fill color */
+      background: none;
       cursor: pointer; 
     }
     .sell-btn:hover {
-      background: #f0f0f0;  /* subtle hover effect */
+      background: #f0f0f0;
     }
   </style>
 </head>
@@ -61,6 +61,8 @@
   </div>
   
   <script>
+    const backendUrl = "https://pos-backend.up.railway.app"; // 🔑 Replace with your backend URL
+
     let displayItems = [];
     let soldItems = [];
     let totalSales = 0;
@@ -91,6 +93,10 @@
       const item = displayItems.splice(index, 1)[0];
       soldItems.push(item);
       totalSales += item.price;
+
+      // ✅ Save to backend
+      saveSale(item.name, item.price);
+
       renderDisplay();
       renderSold();
     }
@@ -101,27 +107,36 @@
       soldItems.forEach(item => {
         const li = document.createElement('li');
         li.classList.add('sold');
-        li.textContent = `${item.name} - ₱${item.price}`;
+        li.textContent = `${item.name} - ₱${item.price} (${item.date ? new Date(item.date).toLocaleString() : 'just now'})`;
         list.appendChild(li);
       });
       document.getElementById('totalSales').textContent = totalSales;
     }
 
     function saveSale(name, price) {
-      fetch('https://pos-backend.up.railway.app/sales', {
+      fetch(`${backendUrl}/sales`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ item: name, price })
-      });
+      })
+      .then(res => res.json())
+      .then(data => console.log("Saved:", data))
+      .catch(err => console.error("Error saving sale:", err));
     }
 
     function loadSales() {
-      fetch('https://pos-backend.up.railway.app/sales')
+      fetch(`${backendUrl}/sales`)
         .then(res => res.json())
         .then(data => {
-          console.log(data); // Replace with your render function
-        });
+          soldItems = data.map(sale => ({ name: sale.item, price: sale.price, date: sale.date }));
+          totalSales = soldItems.reduce((sum, sale) => sum + sale.price, 0);
+          renderSold();
+        })
+        .catch(err => console.error("Error loading sales:", err));
     }
+
+    // ✅ Initial load from backend
+    loadSales();
   </script>
 </body>
 </html>
