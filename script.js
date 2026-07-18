@@ -1,140 +1,182 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 20px;
-  background: #f9f9f9;
+const backendUrl = "https://pos-backend-rjnm.onrender.com";
+
+let displayItems = [];
+let soldItems = [];
+let totalSales = 0;
+
+// Add item
+function addItem() {
+  const name = document.getElementById('itemName').value;
+  const price = parseFloat(document.getElementById('itemPrice').value);
+
+  if (name && price > 0) {
+    const newItem = { name, price };
+    saveDisplayItem(newItem);
+    displayItems.push(newItem);
+    renderDisplay();
+    document.getElementById('itemName').value = '';
+    document.getElementById('itemPrice').value = '';
+  } else {
+    alert("Please enter a valid item name and price.");
+  }
 }
 
-h1 {
-  text-align: center;
+// Render display table
+function renderDisplay() {
+  const tableBody = document.getElementById('displayList');
+  tableBody.innerHTML = '';
+  displayItems.forEach((item, index) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${item.name}</td>
+      <td>₱${item.price}</td>
+      <td>
+        <button class="sell-btn" onclick="sellItem(${index})">Sold</button>
+        <button class="sell-remove-btn" onclick="sellAndRemove(${index}, '${item._id || ''}')">Sold & Remove</button>
+        <button class="remove-btn" onclick="removeDisplayItem(${index}, '${item._id || ''}')">Remove</button>
+      </td>
+    `;
+    tableBody.appendChild(row);
+  });
 }
 
-.container {
-  display: flex;
-  gap: 30px;
+// Sell item (keeps in backend display)
+function sellItem(index) {
+  const item = displayItems[index];
+  soldItems.push(item);
+  totalSales += item.price;
+  saveSale(item.name, item.price);
+  renderSold();
 }
 
-.section {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  width: 45%;
+// Sell & Remove item (removes from backend display)
+function sellAndRemove(index, id) {
+  const item = displayItems.splice(index, 1)[0];
+  soldItems.push(item);
+  totalSales += item.price;
+
+  saveSale(item.name, item.price);
+
+  if (id) {
+    fetch(`${backendUrl}/display/${id}`, { method: 'DELETE' })
+      .catch(err => console.error("Error removing display item:", err));
+  }
+
+  renderDisplay();
+  renderSold();
 }
 
-input, button {
-  padding: 8px;
-  margin: 5px 0;
-  width: 100%;
-  box-sizing: border-box;
-  font-size: 14px;
+// Remove display item only
+function removeDisplayItem(index, id) {
+  displayItems.splice(index, 1);
+  renderDisplay();
+  if (id) {
+    fetch(`${backendUrl}/display/${id}`, { method: 'DELETE' })
+      .catch(err => console.error("Error removing display item:", err));
+  }
 }
 
-/* ✅ Search bar styling */
-input[type="text"]#searchDisplay,
-input[type="text"]#searchSold {
-  width: 100%;
-  padding: 6px;
-  margin: 8px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+// Render sold table
+function renderSold() {
+  const tableBody = document.getElementById('soldList');
+  tableBody.innerHTML = '';
+  soldItems.forEach((item, index) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${item.name}</td>
+      <td>₱${item.price}</td>
+      <td>${item.date ? new Date(item.date).toLocaleString() : 'just now'}</td>
+      <td><button class="remove-btn" onclick="removeSoldItem(${index}, '${item._id || ''}')">Remove</button></td>
+    `;
+    tableBody.appendChild(row);
+  });
+  document.getElementById('totalSales').textContent = totalSales;
 }
 
-/* ✅ Table styling */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
+// Remove sold item
+function removeSoldItem(index, id) {
+  const item = soldItems.splice(index, 1)[0];
+  totalSales -= item.price;
+  renderSold();
+  if (id) {
+    fetch(`${backendUrl}/sales/${id}`, { method: 'DELETE' })
+      .catch(err => console.error("Error removing sold item:", err));
+  }
 }
 
-th, td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: center;
+// Save display item
+function saveDisplayItem(item) {
+  fetch(`${backendUrl}/display`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ item: item.name, price: item.price })
+  }).catch(err => console.error("Error saving display item:", err));
 }
 
-th {
-  background: #f2f2f2;
-  font-weight: bold;
-  cursor: pointer; /* shows clickable sort */
-  user-select: none;
+// Save sale
+function saveSale(name, price) {
+  fetch(`${backendUrl}/sales`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ item: name, price })
+  }).catch(err => console.error("Error saving sale:", err));
 }
 
-tr:nth-child(even) {
-  background: #f9f9f9;
+// Load display
+function loadDisplayItems() {
+  fetch(`${backendUrl}/display`)
+    .then(res => res.json())
+    .then(data => {
+      displayItems = data.map(item => ({ name: item.item, price: item.price, date: item.date, _id: item._id }));
+      renderDisplay();
+    })
+    .catch(err => console.error("Error loading display items:", err));
 }
 
-tr:hover {
-  background: #f1f1f1;
+// Load sales
+function loadSales() {
+  fetch(`${backendUrl}/sales`)
+    .then(res => res.json())
+    .then(data => {
+      soldItems = data.map(sale => ({ name: sale.item, price: sale.price, date: sale.date, _id: sale._id }));
+      totalSales = soldItems.reduce((sum, sale) => sum + sale.price, 0);
+      renderSold();
+    })
+    .catch(err => console.error("Error loading sales:", err));
 }
 
-/* ✅ Sort indicator styling */
-.sort-indicator {
-  font-size: 12px;
-  margin-left: 5px;
-  color: #555;
+// Clear display
+function clearDisplay() {
+  if (!confirm("Are you sure you want to clear all display items?")) return;
+  displayItems = [];
+  renderDisplay();
+  fetch(`${backendUrl}/display/clear`, { method: 'DELETE' }).catch(err => console.error("Error clearing display:", err));
 }
 
-/* ✅ Sold button */
-.sell-btn {
-  width: 90px;
-  text-align: center;
-  font-weight: bold;
-  border: 1px solid #000;
-  border-radius: 5px;
-  background: #fff;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
-}
-.sell-btn:hover {
-  background: #f0f0f0;
-  transform: scale(1.05);
+// Clear sold
+function clearSold() {
+  if (!confirm("Are you sure you want to clear all sold items?")) return;
+  soldItems = [];
+  totalSales = 0;
+  renderSold();
+  fetch(`${backendUrl}/sales/clear`, { method: 'DELETE' }).catch(err => console.error("Error clearing sales:", err));
 }
 
-/* ✅ Sold & Remove button */
-.sell-remove-btn {
-  background: #28a745;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  font-weight: bold;
-  cursor: pointer;
-  padding: 5px 10px;
-  transition: background 0.2s, transform 0.1s;
-}
-.sell-remove-btn:hover {
-  background: #1e7e34;
-  transform: scale(1.05);
+// ✅ Search filters
+function filterDisplay() {
+  const query = document.getElementById('searchDisplay').value.toLowerCase();
+  const rows = document.querySelectorAll('#displayList tr');
+  rows.forEach(row => {
+    const itemName = row.cells[0].textContent.toLowerCase();
+    const itemPrice = row.cells[1].textContent.toLowerCase();
+    const match = itemName.includes(query) || itemPrice.includes(query);
+    row.style.display = match ? '' : 'none';
+  });
 }
 
-/* ✅ Remove buttons */
-.remove-btn {
-  background: #ff9900;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  font-weight: bold;
-  cursor: pointer;
-  padding: 5px 10px;
-  transition: background 0.2s, transform 0.1s;
-}
-.remove-btn:hover {
-  background: #cc7a00;
-  transform: scale(1.05);
-}
-
-/* ✅ Clear buttons */
-button[onclick*="clearDisplay"],
-button[onclick*="clearSold"] {
-  background: #ff4d4d;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
-}
-button[onclick*="clearDisplay"]:hover,
-button[onclick*="clearSold"]:hover {
-  background: #e60000;
-  transform: scale(1.05);
-}
+function filterSold() {
+  const query = document.getElementById('searchSold').value.toLowerCase();
+  const rows = document.querySelectorAll('#soldList tr');
+  rows.forEach(row => {
+    const itemName = row.cells[0].textContent.toLowerCase();
+    const itemPrice = row.cells[1].text
