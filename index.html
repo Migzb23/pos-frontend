@@ -18,16 +18,20 @@
       
       <h2>Items on Display</h2>
       <input type="text" id="searchDisplay" placeholder="Search Display Items..." onkeyup="filterDisplay()">
-      <table id="displayTable">
-        <thead>
-          <tr>
-            <th onclick="sortTable('displayList',0)">Item Name <span class="sort-indicator"></span></th>
-            <th onclick="sortTable('displayList',1,'number')">Price (₱) <span class="sort-indicator"></span></th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="displayList"></tbody>
-      </table>
+
+      <!-- ✅ Scrollable wrapper -->
+      <div class="table-container">
+        <table id="displayTable">
+          <thead>
+            <tr>
+              <th onclick="sortTable('displayList',0)">Item Name <span class="sort-indicator"></span></th>
+              <th onclick="sortTable('displayList',1,'number')">Price (₱) <span class="sort-indicator"></span></th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="displayList"></tbody>
+        </table>
+      </div>
     </div>
     
     <!-- Sold Items & Totals -->
@@ -35,17 +39,22 @@
       <h2>Sold Items</h2>
       <button onclick="clearSold()">Clear Sold Items</button>
       <input type="text" id="searchSold" placeholder="Search Sold Items..." onkeyup="filterSold()">
-      <table id="soldTable">
-        <thead>
-          <tr>
-            <th onclick="sortTable('soldList',0)">Item Name <span class="sort-indicator"></span></th>
-            <th onclick="sortTable('soldList',1,'number')">Price (₱) <span class="sort-indicator"></span></th>
-            <th onclick="sortTable('soldList',2)">Date Sold <span class="sort-indicator"></span></th>
-            <th>Remove</th>
-          </tr>
-        </thead>
-        <tbody id="soldList"></tbody>
-      </table>
+
+      <!-- ✅ Scrollable wrapper -->
+      <div class="table-container">
+        <table id="soldTable">
+          <thead>
+            <tr>
+              <th onclick="sortTable('soldList',0)">Item Name <span class="sort-indicator"></span></th>
+              <th onclick="sortTable('soldList',1,'number')">Price (₱) <span class="sort-indicator"></span></th>
+              <th onclick="sortTable('soldList',2)">Date Sold <span class="sort-indicator"></span></th>
+              <th>Remove</th>
+            </tr>
+          </thead>
+          <tbody id="soldList"></tbody>
+        </table>
+      </div>
+
       <h3>Total Sales: ₱<span id="totalSales">0</span></h3>
     </div>
   </div>
