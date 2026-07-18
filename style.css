@@ -31,7 +31,7 @@ input, button {
 
 /* ✅ Scrollable table container */
 .table-container {
-  max-height: 250px;   /* fixed height forces scrollbar */
+  height: 300px; /* fixed height ensures scrollbar */
   overflow-y: auto;
   border: 1px solid #ddd;
   border-radius: 5px;
