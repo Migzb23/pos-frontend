@@ -127,7 +127,13 @@ function loadDisplayItems() {
   fetch(`${backendUrl}/display`)
     .then(res => res.json())
     .then(data => {
-      displayItems = data.map(item => ({ name: item.item, price: item.price, date: item.date, _id: item._id }));
+      console.log("Display items from backend:", data); // Debug log
+      displayItems = data.map(item => ({
+        name: item.name || item.item,   // handle both cases
+        price: item.price,
+        date: item.date,
+        _id: item._id
+      }));
       renderDisplay();
     })
     .catch(err => console.error("Error loading display items:", err));
@@ -138,7 +144,13 @@ function loadSales() {
   fetch(`${backendUrl}/sales`)
     .then(res => res.json())
     .then(data => {
-      soldItems = data.map(sale => ({ name: sale.item, price: sale.price, date: sale.date, _id: sale._id }));
+      console.log("Sales from backend:", data); // Debug log
+      soldItems = data.map(sale => ({
+        name: sale.name || sale.item,   // handle both cases
+        price: sale.price,
+        date: sale.date,
+        _id: sale._id
+      }));
       totalSales = soldItems.reduce((sum, sale) => sum + sale.price, 0);
       renderSold();
     })
