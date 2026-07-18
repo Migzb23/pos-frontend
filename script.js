@@ -30,24 +30,43 @@ function renderDisplay() {
     row.innerHTML = `
       <td>${item.name}</td>
       <td>₱${item.price}</td>
-      <td><button class="sell-btn" onclick="sellItem(${index})">Sold</button></td>
-      <td><button class="remove-btn" onclick="removeDisplayItem(${index}, '${item._id || ''}')">Remove</button></td>
+      <td>
+        <button class="sell-btn" onclick="sellItem(${index})">Sold</button>
+        <button class="sell-remove-btn" onclick="sellAndRemove(${index}, '${item._id || ''}')">Sold & Remove</button>
+        <button class="remove-btn" onclick="removeDisplayItem(${index}, '${item._id || ''}')">Remove</button>
+      </td>
     `;
     tableBody.appendChild(row);
   });
 }
 
-// Sell item
+// Sell item (keeps in backend display)
 function sellItem(index) {
-  const item = displayItems.splice(index, 1)[0];
+  const item = displayItems[index];
   soldItems.push(item);
   totalSales += item.price;
   saveSale(item.name, item.price);
+  renderSold();
+}
+
+// Sell & Remove item (removes from backend display)
+function sellAndRemove(index, id) {
+  const item = displayItems.splice(index, 1)[0];
+  soldItems.push(item);
+  totalSales += item.price;
+
+  saveSale(item.name, item.price);
+
+  if (id) {
+    fetch(`${backendUrl}/display/${id}`, { method: 'DELETE' })
+      .catch(err => console.error("Error removing display item:", err));
+  }
+
   renderDisplay();
   renderSold();
 }
 
-// Remove display item
+// Remove display item only
 function removeDisplayItem(index, id) {
   displayItems.splice(index, 1);
   renderDisplay();
@@ -160,61 +179,4 @@ function filterSold() {
   const rows = document.querySelectorAll('#soldList tr');
   rows.forEach(row => {
     const itemName = row.cells[0].textContent.toLowerCase();
-    const itemPrice = row.cells[1].textContent.toLowerCase();
-    const itemDate = row.cells[2].textContent.toLowerCase();
-    const match = itemName.includes(query) || itemPrice.includes(query) || itemDate.includes(query);
-    row.style.display = match ? '' : 'none';
-  });
-}
-
-// ✅ Sort with indicators
-function sortTable(tbodyId, colIndex, type = 'string') {
-  const tbody = document.getElementById(tbodyId);
-  const rows = Array.from(tbody.querySelectorAll('tr'));
-  const headers = tbody.closest('table').querySelectorAll('th');
-
-  if (rows.length === 0) return;
-
-  let sorted = rows.sort((a, b) => {
-    let valA = a.cells[colIndex].textContent.trim().toLowerCase();
-    let valB = b.cells[colIndex].textContent.trim().toLowerCase();
-
-    if (type === 'number') {
-      valA = parseFloat(valA.replace(/[^\d.-]/g, '')) || 0;
-      valB = parseFloat(valB.replace(/[^\d.-]/g, '')) || 0;
-    }
-
-    if (valA < valB) return -1;
-    if (valA > valB) return 1;
-    return 0;
-  });
-
-  let currentSort = tbody.getAttribute('data-sorted');
-  if (currentSort === `${colIndex}-asc`) {
-    sorted.reverse();
-    tbody.setAttribute('data-sorted', `${colIndex}-desc`);
-    updateIndicators(headers, colIndex, 'desc');
-  } else {
-    tbody.setAttribute('data-sorted', `${colIndex}-asc`);
-    updateIndicators(headers, colIndex, 'asc');
-  }
-
-  tbody.innerHTML = '';
-  sorted.forEach(row => tbody.appendChild(row));
-}
-
-function updateIndicators(headers, activeIndex, direction) {
-  headers.forEach((header, i) => {
-    const indicator = header.querySelector('.sort-indicator');
-    if (!indicator) return;
-    if (i === activeIndex) {
-      indicator.textContent = direction === 'asc' ? '▲' : '▼';
-    } else {
-      indicator.textContent = '';
-    }
-  });
-}
-
-// ✅ Initial load
-loadDisplayItems();
-loadSales();
+    const itemPrice = row.cells[1].text
