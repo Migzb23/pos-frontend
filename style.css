@@ -76,7 +76,7 @@ tr:hover {
 
 /* ✅ Sold button */
 .sell-btn {
-  width: 70px;
+  width: 90px;
   text-align: center;
   font-weight: bold;
   border: 1px solid #000;
@@ -87,6 +87,22 @@ tr:hover {
 }
 .sell-btn:hover {
   background: #f0f0f0;
+  transform: scale(1.05);
+}
+
+/* ✅ Sold & Remove button */
+.sell-remove-btn {
+  background: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 5px 10px;
+  transition: background 0.2s, transform 0.1s;
+}
+.sell-remove-btn:hover {
+  background: #1e7e34;
   transform: scale(1.05);
 }
 
